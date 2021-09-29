@@ -758,6 +758,9 @@ public:
 		bool gzip,
 		bool no_timestamp,
 		bool no_version);
+  void writeTimingDump(const char *filename,
+		Corner *corner,
+		char sdf_divider);
   // Remove all delay and slew annotations.
   void removeDelaySlewAnnotations();
   // TCL variable sta_crpr_enabled.

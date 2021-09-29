@@ -144,6 +144,7 @@ set(STA_SOURCE
   sdf/ReportAnnotation.cc
   sdf/SdfReader.cc
   sdf/SdfWriter.cc
+  sdf/TimingDumpWriter.cc
   
   search/Bfs.cc
   search/CheckMaxSkews.cc

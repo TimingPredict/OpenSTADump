@@ -21,6 +21,7 @@
 #include "sdf/SdfReader.hh"
 #include "sdf/ReportAnnotation.hh"
 #include "sdf/SdfWriter.hh"
+#include "sdf/TimingDumpWriter.hh"
 #include "Search.hh"
 #include "Sta.hh"
 
@@ -156,6 +157,16 @@ write_sdf_cmd(char *filename,
   Sta *sta = Sta::sta();
   sta->writeSdf(filename, corner, sdf_divider, digits, gzip,
 		no_timestamp, no_version);
+}
+
+void
+write_timingdump_cmd(char *filename,
+	      Corner *corner,
+	      char sdf_divider)
+{
+  cmdLinkedNetwork();
+  Sta *sta = Sta::sta();
+  sta->writeTimingDump(filename, corner, sdf_divider);
 }
 
 %} // inline

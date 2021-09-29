@@ -44,6 +44,7 @@
 #include "ArcDelayCalc.hh"
 #include "dcalc/GraphDelayCalc1.hh"
 #include "sdf/SdfWriter.hh"
+#include "sdf/TimingDumpWriter.hh"
 #include "Levelize.hh"
 #include "Sim.hh"
 #include "ClkInfo.hh"
@@ -3440,6 +3441,15 @@ Sta::writeSdf(const char *filename,
   findDelays();
   sta::writeSdf(filename, corner, sdf_divider, digits, gzip, no_timestamp,
 		no_version, this);
+}
+
+void
+Sta::writeTimingDump(const char *filename,
+	      Corner *corner,
+	      char sdf_divider)
+{
+  findDelays();
+  sta::writeTimingDump(filename, corner, sdf_divider, this);
 }
 
 void

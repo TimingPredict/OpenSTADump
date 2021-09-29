@@ -226,5 +226,26 @@ proc_redirect write_sdf {
     $no_timestamp $no_version
 }
 
+define_cmd_args "write_timingdump" \
+  {[-corner corner_name] [-divider /|.] \
+     filename}
+
+proc_redirect write_timingdump {
+  parse_key_args "write_timingdump" args \
+    keys {-corner -divider} \
+    flags {}
+  check_argc_eq1 "write_timingdump" $args
+  set corner [parse_corner keys]
+  set filename [file nativename [lindex $args 0]]
+  set divider "/"
+  if [info exists keys(-divider)] {
+    set divider $keys(-divider)
+    if { !($divider == "/" || $divider == ".") } {
+      sta_error 432 "TimingDump -divider must be / or ."
+    }
+  }
+  write_timingdump_cmd $filename $corner $divider
+}
+
 # sta namespace end
 }
