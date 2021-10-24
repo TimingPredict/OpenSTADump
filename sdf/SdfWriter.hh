@@ -18,6 +18,7 @@
 
 namespace sta {
 
+class Sta;
 class StaState;
 class Corner;
 
@@ -29,6 +30,6 @@ writeSdf(const char *filename,
 	 bool gzip,
 	 bool no_timestamp,
 	 bool no_version,
-	 StaState *sta);
+	 Sta *sta);
 
 } // namespace

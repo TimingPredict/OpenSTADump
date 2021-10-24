@@ -33,6 +33,7 @@
 #include "Graph.hh"
 #include "DcalcAnalysisPt.hh"
 #include "GraphDelayCalc.hh"
+#include "Sta.hh"
 #include "StaState.hh"
 #include "Corner.hh"
 #include "PathAnalysisPt.hh"
@@ -42,7 +43,7 @@ namespace sta {
 class SdfWriter : public StaState
 {
 public:
-  SdfWriter(StaState *sta);
+  SdfWriter(Sta *sta);
   ~SdfWriter();
   void write(const char *filename,
 	     Corner *corner,
@@ -99,6 +100,9 @@ protected:
   void writeSdfTuple(float min_delay,
 		     float max_delay);
   void writeSdfDelay(double delay);
+
+  void writeArrivals();
+  
   char *sdfPortName(const Pin *pin);
   char *sdfPathName(const Pin *pin);
   char *sdfPathName(const Instance *inst);
@@ -118,6 +122,8 @@ private:
   const Corner *corner_;
   int arc_delay_min_index_;
   int arc_delay_max_index_;
+
+  Sta *sta_;
 };
 
 void
@@ -128,18 +134,19 @@ writeSdf(const char *filename,
 	 bool gzip,
 	 bool no_timestamp,
 	 bool no_version,
-	 StaState *sta)
+	 Sta *sta)
 {
   SdfWriter writer(sta);
   writer.write(filename, corner, sdf_divider, digits, gzip,
 	       no_timestamp, no_version);
 }
 
-SdfWriter::SdfWriter(StaState *sta) :
+SdfWriter::SdfWriter(Sta *sta) :
   StaState(sta),
   sdf_escape_('\\'),
   network_escape_(network_->pathEscape()),
-  delay_format_(nullptr)
+  delay_format_(nullptr),
+  sta_(sta)
 {
 }
 
@@ -180,6 +187,7 @@ SdfWriter::write(const char *filename,
   writeHeader(default_lib, no_timestamp, no_version);
   writeInterconnects();
   writeInstances();
+  writeArrivals();
   writeTrailer();
 
   gzclose(stream_);
@@ -703,6 +711,36 @@ SdfWriter::writePeriodCheck(const Pin *pin,
 	   sdfPortName(pin));
   writeSdfTuple(min_period, min_period);
   gzprintf(stream_, ")\n");
+}
+
+void
+SdfWriter::writeArrivals()
+{
+  gzprintf(stream_, " (ARRIVALTIMES\n");
+  
+  InstancePinIterator *pin_iter = network_->pinIterator(network_->topInstance());
+  while (pin_iter->hasNext()) {
+    Pin *pin = pin_iter->next();
+    Vertex *vertex = graph_->pinLoadVertex(pin);
+    gzprintf(stream_, "  (AT %s ", sdfPathName(pin));
+    RiseFallMinMax ats;
+    for(auto rf: RiseFall::range()) {
+      for(auto el: MinMax::range()) {
+        auto path_ap = corner_->findPathAnalysisPt(el);
+        if(!path_ap) continue;
+        auto arrival = sta_->vertexArrival(vertex, rf, path_ap);
+        ats.setValue(rf, path_ap->pathMinMax(), arrival);
+      }
+    }
+
+    writeSdfTuple(ats, RiseFall::rise());
+    gzprintf(stream_, " ");
+    writeSdfTuple(ats, RiseFall::fall());
+    gzprintf(stream_, ")\n");
+  }
+  delete pin_iter;
+  
+  gzprintf(stream_, " )\n");
 }
 
 const char *
