@@ -102,6 +102,7 @@ protected:
   void writeSdfDelay(double delay);
 
   void writeArrivals();
+  void writeInstArrivals(Instance *inst);
   
   char *sdfPortName(const Pin *pin);
   char *sdfPathName(const Pin *pin);
@@ -718,7 +719,20 @@ SdfWriter::writeArrivals()
 {
   gzprintf(stream_, " (ARRIVALTIMES\n");
   
-  InstancePinIterator *pin_iter = network_->pinIterator(network_->topInstance());
+  writeInstArrivals(network_->topInstance());
+  LeafInstanceIterator *inst_iter = network_->leafInstanceIterator();
+  while (inst_iter->hasNext()) {
+    Instance *inst = inst_iter->next();
+    writeInstArrivals(inst);
+  }
+  delete inst_iter;
+  
+  gzprintf(stream_, " )\n");
+}
+
+void SdfWriter::writeInstArrivals(Instance *inst)
+{
+  InstancePinIterator *pin_iter = network_->pinIterator(inst);
   while (pin_iter->hasNext()) {
     Pin *pin = pin_iter->next();
     Vertex *vertex = graph_->pinLoadVertex(pin);
@@ -739,8 +753,6 @@ SdfWriter::writeArrivals()
     gzprintf(stream_, ")\n");
   }
   delete pin_iter;
-  
-  gzprintf(stream_, " )\n");
 }
 
 const char *
