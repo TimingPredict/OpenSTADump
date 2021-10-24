@@ -262,6 +262,8 @@ SpefReader::setCapScale(float scale,
     cap_scale_ = scale * 1E-15F;
   else
     warn(168, "unknown units %s.", units);
+  // warn(19191, "[ZZ] Scaled capacitor up 2x in parasitics for demonstration.");
+  // cap_scale_ *= 2;
   stringDelete(units);
 }
 
@@ -275,6 +277,8 @@ SpefReader::setResScale(float scale,
     res_scale_ = scale * 1E+3F;
   else
     warn(170, "unknown units %s.", units);
+  // warn(19192, "[ZZ] Scaled resistor up 10x in parasitics for demonstration.");
+  // res_scale_ *= 10;
   stringDelete(units);
 }
 
