@@ -736,6 +736,8 @@ void SdfWriter::writeInstArrivals(Instance *inst)
   while (pin_iter->hasNext()) {
     Pin *pin = pin_iter->next();
     Vertex *vertex = graph_->pinLoadVertex(pin);
+
+    // arrival time
     gzprintf(stream_, "  (AT %s ", sdfPathName(pin));
     RiseFallMinMax ats;
     for(auto rf: RiseFall::range()) {
@@ -750,6 +752,20 @@ void SdfWriter::writeInstArrivals(Instance *inst)
     writeSdfTuple(ats, RiseFall::rise());
     gzprintf(stream_, " ");
     writeSdfTuple(ats, RiseFall::fall());
+    gzprintf(stream_, ")\n");
+
+    // slew
+    gzprintf(stream_, "  (SLEW %s ", sdfPathName(pin));
+    RiseFallMinMax slews;
+    for(auto rf: RiseFall::range()) {
+      for(auto el: MinMax::range()) {
+        slews.setValue(rf, el, sta_->vertexSlew(vertex, rf, el));
+      }
+    }
+
+    writeSdfTuple(slews, RiseFall::rise());
+    gzprintf(stream_, " ");
+    writeSdfTuple(slews, RiseFall::fall());
     gzprintf(stream_, ")\n");
   }
   delete pin_iter;
