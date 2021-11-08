@@ -767,6 +767,20 @@ void SdfWriter::writeInstArrivals(Instance *inst)
     gzprintf(stream_, " ");
     writeSdfTuple(slews, RiseFall::fall());
     gzprintf(stream_, ")\n");
+    
+    // required arrival time
+    gzprintf(stream_, "  (RAT %s ", sdfPathName(pin));
+    RiseFallMinMax rats;
+    for(auto rf: RiseFall::range()) {
+      for(auto el: MinMax::range()) {
+        rats.setValue(rf, el, sta_->vertexRequired(vertex, rf, el));
+      }
+    }
+
+    writeSdfTuple(rats, RiseFall::rise());
+    gzprintf(stream_, " ");
+    writeSdfTuple(rats, RiseFall::fall());
+    gzprintf(stream_, ")\n");
   }
   delete pin_iter;
 }
